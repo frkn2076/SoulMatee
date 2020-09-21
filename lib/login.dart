@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-import 'Utilities.dart';
+import 'RegisterRequestViewModel.dart';
+import 'RegisterResponseViewModel.dart';
+import 'utilities.dart';
 import 'holder.dart';
+import 'serviceProvider.dart';
 
 class Login extends StatelessWidget {
   Login({Key key, this.isSignInParam = true}) : super(key: key);
@@ -43,6 +46,11 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var languages = <String>['Türkçe', 'English'];
+  RegisterResponseViewModel _register;
+  Future<String> _deviceId;
+  TextEditingController emailController = new TextEditingController();
+  TextEditingController passwordController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,6 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
           decoration: kBoxDecorationStyle,
           height: 60.0,
           child: TextField(
+            controller: emailController,
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(
               color: Colors.white,
@@ -185,6 +194,7 @@ class _MyHomePageState extends State<MyHomePage> {
           decoration: kBoxDecorationStyle,
           height: 60.0,
           child: TextField(
+            controller: passwordController,
             obscureText: true,
             style: TextStyle(
               color: Colors.white,
@@ -272,32 +282,47 @@ class _MyHomePageState extends State<MyHomePage> {
           elevation: 5.0,
           onPressed: () {
             // Navigator.pushNamed(context, '/dashboard');
-            Alert(
-                context: context,
-                title: Holder.isTurkish
-                    ? "Emailinize gönderilen 6 haneli anahtarı giriniz"
-                    : "Enter the 6 digit key sent to your email",
-                content: TextField(
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.lock),
-                    labelText: Holder.isTurkish ? "Anahtar" : "Password",
-                  ),
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.digitsOnly,
-                    LengthLimitingTextInputFormatter(6)
-                  ],
-                ),
-                buttons: [
-                  DialogButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(
-                      Holder.isTurkish ? "Gönder" : "Send",
-                      style: TextStyle(color: Colors.white, fontSize: 20),
+            FutureBuilder<RegisterResponseViewModel>(
+                future: register(RegisterRequestViewModel(
+                    email: emailController.text,
+                    password: passwordController.text,
+                    isTurkish: Holder.isTurkish,
+                    deviceId: "asd")),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    setState(() {
+                      _register = snapshot.data;
+                    });
+                  }
+                });
+            _register == null
+                ? CircularProgressIndicator()
+                : Alert(
+                    context: context,
+                    title: Holder.isTurkish
+                        ? "Emailinize gönderilen 6 haneli anahtarı giriniz"
+                        : "Enter the 6 digit key sent to your email",
+                    content: TextField(
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        icon: Icon(Icons.lock),
+                        labelText: Holder.isTurkish ? "Anahtar" : "Password",
+                      ),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: <TextInputFormatter>[
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(6)
+                      ],
                     ),
-                  )
-                ]).show();
+                    buttons: [
+                        DialogButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: Text(
+                            Holder.isTurkish ? "Gönder" : "Send",
+                            style: TextStyle(color: Colors.white, fontSize: 20),
+                          ),
+                        )
+                      ]).show();
           },
           padding: EdgeInsets.all(15.0),
           shape: RoundedRectangleBorder(

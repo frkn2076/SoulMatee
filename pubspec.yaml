@@ -21,6 +21,8 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
+  device_info: ^0.4.0+4
+  http: ^0.12.2
   rflutter_alert: ^1.0.3
   flutter:
     sdk: flutter
