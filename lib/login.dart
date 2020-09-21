@@ -1,8 +1,10 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'Utilities.dart';
+import 'holder.dart';
 
 class Login extends StatelessWidget {
   Login({Key key, this.isSignInParam = true}) : super(key: key);
@@ -40,7 +42,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String dropdownValue = "Türkçe";
+  var languages = <String>['Türkçe', 'English'];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,22 +86,23 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: DropdownButton<String>(
                           // dropdownColor: Colors.transparent,
                           underline: Container(), //to remove underline
-                          items:
-                              <String>['Türkçe', 'English'].map((String value) {
+                          items: languages.map((String value) {
                             return new DropdownMenuItem<String>(
                                 value: value, child: Text(value));
                           }).toList(),
-                          value: dropdownValue,
+                          value: Holder.isTurkish ? languages[0] : languages[1],
                           onChanged: (String newVal) {
                             setState(() {
-                              this.dropdownValue = newVal;
+                              Holder.isTurkish = newVal == languages[0];
                             });
                           },
                         ),
                       ),
                       SizedBox(height: 80.0),
                       Text(
-                        widget.isSignIn ? dropdownValue == "Türkçe" ? "Kayıt Ol" : "Sign In" : dropdownValue == "Türkçe" ? "Giriş" : "Login",
+                        widget.isSignIn
+                            ? Holder.isTurkish ? "Kayıt Ol" : "Sign In"
+                            : Holder.isTurkish ? "Giriş" : "Login",
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'OpenSans',
@@ -158,7 +161,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icons.email,
                 color: Colors.white,
               ),
-              hintText: dropdownValue == "Türkçe" ? "Emailinizi giriniz" : 'Enter your Email',
+              hintText:
+                  Holder.isTurkish ? "Emailinizi giriniz" : 'Enter your Email',
               hintStyle: kHintTextStyle,
             ),
           ),
@@ -172,7 +176,7 @@ class _MyHomePageState extends State<MyHomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          dropdownValue == "Türkçe" ? "Şifre" : "Password",
+          Holder.isTurkish ? "Şifre" : "Password",
           style: kLabelStyle,
         ),
         SizedBox(height: 10.0),
@@ -193,7 +197,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icons.lock,
                 color: Colors.white,
               ),
-              hintText: dropdownValue == "Türkçe" ? "Şifrenizi giriniz" : 'Enter your Password',
+              hintText: Holder.isTurkish
+                  ? "Şifrenizi giriniz"
+                  : 'Enter your Password',
               hintStyle: kHintTextStyle,
             ),
           ),
@@ -210,7 +216,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Column(
       children: <Widget>[
         Text(
-          dropdownValue == "Türkçe" ? "-YA DA-" : "- OR -",
+          Holder.isTurkish ? "-YA DA-" : "- OR -",
           style: TextStyle(
             color: Colors.white38,
             fontWeight: FontWeight.w400,
@@ -232,9 +238,13 @@ class _MyHomePageState extends State<MyHomePage> {
             fontFamily: 'OpenSans',
           ),
           children: <TextSpan>[
-            TextSpan(text: dropdownValue == "Türkçe" ? "Buraya tıklayarak " : "Click here to "),
             TextSpan(
-                text: widget.isSignIn ? dropdownValue == "Türkçe" ? "Giriş yap" : "Login" : dropdownValue == "Türkçe" ? "Kayıt Ol" : "Sign In",
+                text:
+                    Holder.isTurkish ? "Buraya tıklayarak " : "Click here to "),
+            TextSpan(
+                text: widget.isSignIn
+                    ? Holder.isTurkish ? "Giriş yap" : "Login"
+                    : Holder.isTurkish ? "Kayıt Ol" : "Sign In",
                 style: TextStyle(
                   color: Colors.white54,
                   letterSpacing: 1.5,
@@ -261,7 +271,33 @@ class _MyHomePageState extends State<MyHomePage> {
       child: RaisedButton(
           elevation: 5.0,
           onPressed: () {
-            Navigator.pushNamed(context, '/dashboard');
+            // Navigator.pushNamed(context, '/dashboard');
+            Alert(
+                context: context,
+                title: Holder.isTurkish
+                    ? "Emailinize gönderilen 6 haneli anahtarı giriniz"
+                    : "Enter the 6 digit key sent to your email",
+                content: TextField(
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.lock),
+                    labelText: Holder.isTurkish ? "Anahtar" : "Password",
+                  ),
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(6)
+                  ],
+                ),
+                buttons: [
+                  DialogButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      Holder.isTurkish ? "Gönder" : "Send",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  )
+                ]).show();
           },
           padding: EdgeInsets.all(15.0),
           shape: RoundedRectangleBorder(
