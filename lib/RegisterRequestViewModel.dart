@@ -9,7 +9,14 @@ class RegisterRequestViewModel{
   Map<String,dynamic> toJson() => { 
       "email": this.email,
       "password": this.password,
-      "deviceId": this.deviceId,
-      "isTurkish": this.isTurkish
+      "deviceId": this.deviceId
+  };
+}
+
+class RegisterRequestViewModel2{
+  final String mailKey;
+  RegisterRequestViewModel2({this.mailKey});
+  Map<String,dynamic> toJson() => { 
+      "mailKey": this.mailKey,
   };
 }

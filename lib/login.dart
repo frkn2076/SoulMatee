@@ -50,6 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<String> _deviceId;
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
+  TextEditingController keyController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -108,9 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                       SizedBox(height: 80.0),
                       Text(
-                        widget.isSignIn
-                            ? Holder.isTurkish ? "Kayıt Ol" : "Sign In"
-                            : Holder.isTurkish ? "Giriş" : "Login",
+                        widget.isSignIn ? Holder.signIn : Holder.login,
                         style: TextStyle(
                           color: Colors.white,
                           fontFamily: 'OpenSans',
@@ -171,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Colors.white,
               ),
               hintText:
-                  Holder.isTurkish ? "Emailinizi giriniz" : 'Enter your Email',
+                  Holder.enterEmail,
               hintStyle: kHintTextStyle,
             ),
           ),
@@ -185,7 +184,7 @@ class _MyHomePageState extends State<MyHomePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          Holder.isTurkish ? "Şifre" : "Password",
+          Holder.password,
           style: kLabelStyle,
         ),
         SizedBox(height: 10.0),
@@ -207,9 +206,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icons.lock,
                 color: Colors.white,
               ),
-              hintText: Holder.isTurkish
-                  ? "Şifrenizi giriniz"
-                  : 'Enter your Password',
+              hintText: Holder.enterPassword,
               hintStyle: kHintTextStyle,
             ),
           ),
@@ -226,7 +223,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Column(
       children: <Widget>[
         Text(
-          Holder.isTurkish ? "-YA DA-" : "- OR -",
+          Holder.or,
           style: TextStyle(
             color: Colors.white38,
             fontWeight: FontWeight.w400,
@@ -250,11 +247,11 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <TextSpan>[
             TextSpan(
                 text:
-                    Holder.isTurkish ? "Buraya tıklayarak " : "Click here to "),
+                    Holder.clickHere),
             TextSpan(
                 text: widget.isSignIn
-                    ? Holder.isTurkish ? "Giriş yap" : "Login"
-                    : Holder.isTurkish ? "Kayıt Ol" : "Sign In",
+                    ? Holder.login2
+                    : Holder.signIn,
                 style: TextStyle(
                   color: Colors.white54,
                   letterSpacing: 1.5,
@@ -281,32 +278,31 @@ class _MyHomePageState extends State<MyHomePage> {
       child: RaisedButton(
           elevation: 5.0,
           onPressed: () {
-            // Navigator.pushNamed(context, '/dashboard');
-            FutureBuilder<RegisterResponseViewModel>(
-                future: register(RegisterRequestViewModel(
+            register(RegisterRequestViewModel(
                     email: emailController.text,
                     password: passwordController.text,
                     isTurkish: Holder.isTurkish,
-                    deviceId: "asd")),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    setState(() {
-                      _register = snapshot.data;
-                    });
-                  }
-                });
+                    deviceId: "deneme"))
+                .then((value) {
+              _register =
+                  value; //Then koyduğum için data'nın gelmesini bekliyor, o yüzden null olmuyor hiç, daha sonra async yap
+            });
             _register == null
-                ? CircularProgressIndicator()
-                : Alert(
+                ? Alert(
+                        context: context,
+                        title: Holder.processing,
+                        content: CircularProgressIndicator())
+                    .show() : 
+                    Alert(
+                    style: AlertStyle(isOverlayTapDismiss: true),
                     context: context,
-                    title: Holder.isTurkish
-                        ? "Emailinize gönderilen 6 haneli anahtarı giriniz"
-                        : "Enter the 6 digit key sent to your email",
+                    title: Holder.enterKey,
                     content: TextField(
+                      controller: keyController,
                       obscureText: true,
                       decoration: InputDecoration(
                         icon: Icon(Icons.lock),
-                        labelText: Holder.isTurkish ? "Anahtar" : "Password",
+                        labelText: Holder.key,
                       ),
                       keyboardType: TextInputType.phone,
                       inputFormatters: <TextInputFormatter>[
@@ -316,9 +312,29 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     buttons: [
                         DialogButton(
-                          onPressed: () => Navigator.pop(context),
+                          onPressed: () {
+                            register2(RegisterRequestViewModel2(
+                                    mailKey: keyController.text))
+                                .then((value) {
+                              if (value.isSuccess) {
+                                Alert(
+                                  context: context,
+                                  // title: "RFLUTTER ALERT",
+                                  desc: Holder.accountCreated,
+                                  image: Image.asset("assets/okay.png"),
+                                ).show();
+                              } else {
+                                Alert(
+                                  context: context,
+                                  // title: "RFLUTTER ALERT",
+                                  desc: Holder.wrongKey,
+                                  image: Image.asset("assets/okay.png"),
+                                ).show();
+                              }
+                            });
+                          },
                           child: Text(
-                            Holder.isTurkish ? "Gönder" : "Send",
+                            Holder.send,
                             style: TextStyle(color: Colors.white, fontSize: 20),
                           ),
                         )

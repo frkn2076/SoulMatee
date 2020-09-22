@@ -35,9 +35,11 @@ class ButtonModel {
     return ButtonModel(
       message: json['message'],
       subMessage: json['subMessage'],
-      type: json['type'],
+      type: ConfirmationType.values[json['type']] ,
     );
   }
 }
 
 enum ConfirmationType { Ok, Cancel }
+
+
