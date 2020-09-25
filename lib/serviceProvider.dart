@@ -19,7 +19,7 @@ Future<RegisterResponseViewModel> register(RegisterRequestViewModel register1) a
   } else {
     // If the server did not return a 201 CREATED response,
     // then throw an exception.
-    throw Exception('Failed to load album');
+    throw Exception('Failed to load register1');
   }
 }
 
@@ -39,6 +39,6 @@ Future<RegisterResponseViewModel> register2(RegisterRequestViewModel2 register2)
   } else {
     // If the server did not return a 201 CREATED response,
     // then throw an exception.
-    throw Exception('Failed to load album');
+    throw Exception('Failed to load register2');
   }
 }

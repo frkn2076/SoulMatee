@@ -1,3 +1,4 @@
+import 'package:SoulMatee/dashboard.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -17,9 +18,9 @@ class Login extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // routes: {
-      //   '/dashboard': (context) => Dashboard(),
-      // },
+      routes: {
+        '/dashboard': (context) => Dashboard(/*ModalRoute.of(context).settings.arguments*/),
+      },
       // initialRoute: '/',
       // onGenerateRoute: RouteGenerator.generateRoute,
       // onUnknownRoute: (RouteSettings setting) {
@@ -46,7 +47,8 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   var languages = <String>['Türkçe', 'English'];
-  RegisterResponseViewModel _register;
+  RegisterResponseViewModel _register1;
+  RegisterResponseViewModel _register2;
   Future<String> _deviceId;
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
@@ -169,8 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Icons.email,
                 color: Colors.white,
               ),
-              hintText:
-                  Holder.enterEmail,
+              hintText: Holder.enterEmail,
               hintStyle: kHintTextStyle,
             ),
           ),
@@ -245,13 +246,9 @@ class _MyHomePageState extends State<MyHomePage> {
             fontFamily: 'OpenSans',
           ),
           children: <TextSpan>[
+            TextSpan(text: Holder.clickHere),
             TextSpan(
-                text:
-                    Holder.clickHere),
-            TextSpan(
-                text: widget.isSignIn
-                    ? Holder.login2
-                    : Holder.signIn,
+                text: widget.isSignIn ? Holder.login2 : Holder.signIn,
                 style: TextStyle(
                   color: Colors.white54,
                   letterSpacing: 1.5,
@@ -278,67 +275,54 @@ class _MyHomePageState extends State<MyHomePage> {
       child: RaisedButton(
           elevation: 5.0,
           onPressed: () {
+            
             register(RegisterRequestViewModel(
                     email: emailController.text,
                     password: passwordController.text,
                     isTurkish: Holder.isTurkish,
                     deviceId: "deneme"))
                 .then((value) {
-              _register =
-                  value; //Then koyduğum için data'nın gelmesini bekliyor, o yüzden null olmuyor hiç, daha sonra async yap
+              setState(() {
+                _register1 = value;
+              });
             });
-            _register == null
-                ? Alert(
-                        context: context,
-                        title: Holder.processing,
-                        content: CircularProgressIndicator())
-                    .show() : 
-                    Alert(
-                    style: AlertStyle(isOverlayTapDismiss: true),
-                    context: context,
-                    title: Holder.enterKey,
-                    content: TextField(
-                      controller: keyController,
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        icon: Icon(Icons.lock),
-                        labelText: Holder.key,
-                      ),
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: <TextInputFormatter>[
-                        FilteringTextInputFormatter.digitsOnly,
-                        LengthLimitingTextInputFormatter(6)
-                      ],
+            // Then koyduğum için data'nın gelmesini bekliyor, o yüzden null olmuyor hiç, daha sonra async yaparsın.
+            // if (isLoading) {
+            //   alert();
+            //   Alert(
+            //     closeFunction: () => alert(),
+            //           context: context,
+            //           title: Holder.processing,
+            //           content: CircularProgressIndicator())
+            //       .show();
+            // } else {
+            Alert(
+                context: context,
+                title: Holder.enterKey,
+                content: TextField(
+                  controller: keyController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    icon: Icon(Icons.lock),
+                    labelText: Holder.key,
+                  ),
+                  keyboardType: TextInputType.phone,
+                  inputFormatters: <TextInputFormatter>[
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(6)
+                  ],
+                ),
+                buttons: [
+                  DialogButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/dashboard'/*, arguments: 3*/);
+                    },
+                    child: Text(
+                      Holder.send,
+                      style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
-                    buttons: [
-                        DialogButton(
-                          onPressed: () {
-                            register2(RegisterRequestViewModel2(
-                                    mailKey: keyController.text))
-                                .then((value) {
-                              if (value.isSuccess) {
-                                Alert(
-                                  context: context,
-                                  // title: "RFLUTTER ALERT",
-                                  desc: Holder.accountCreated,
-                                  image: Image.asset("assets/okay.png"),
-                                ).show();
-                              } else {
-                                Alert(
-                                  context: context,
-                                  // title: "RFLUTTER ALERT",
-                                  desc: Holder.wrongKey,
-                                  image: Image.asset("assets/okay.png"),
-                                ).show();
-                              }
-                            });
-                          },
-                          child: Text(
-                            Holder.send,
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
-                        )
-                      ]).show();
+                  )
+                ]).show();
           },
           padding: EdgeInsets.all(15.0),
           shape: RoundedRectangleBorder(
